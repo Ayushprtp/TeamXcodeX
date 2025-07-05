@@ -1,3 +1,4 @@
+// types/telegram.d.ts
 interface TelegramWebAppUser {
   id: number;
   first_name: string;
