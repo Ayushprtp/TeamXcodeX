@@ -10,29 +10,29 @@ export default function Home() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (isTelegram === null) {
-        // still undetected after timeout = fallback
+        // fallback for non-Telegram environments
         setIsTelegram(false);
         setTheme('dark');
         setUser({
           first_name: 'Developer',
-          username: 'Ayushprtp',
+          username: 'localhost',
         });
       }
-    }, 1000); // wait 1s for Telegram to initialize
+    }, 500); // wait briefly for Telegram SDK to be ready
 
-    if (typeof window !== 'undefined') {
-      const tg = window.Telegram?.WebApp;
-      if (tg) {
-        tg.ready();
-        tg.expand();
-        setTheme(tg.colorScheme || 'light');
-        setUser(tg.initDataUnsafe?.user || null);
-        setIsTelegram(true);
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+      const tg = window.Telegram.WebApp;
+      tg.ready();
+      tg.expand();
 
-        tg.BackButton.show();
-        tg.BackButton.onClick(() => tg.close());
-        clearTimeout(timeout); // success: cancel fallback
-      }
+      setUser(tg.initDataUnsafe?.user || null);
+      setTheme(tg.colorScheme || 'light');
+      setIsTelegram(true);
+
+      tg.BackButton.show();
+      tg.BackButton.onClick(() => tg.close());
+
+      clearTimeout(timeout); // cancel fallback
     }
 
     return () => clearTimeout(timeout);
@@ -40,10 +40,11 @@ export default function Home() {
 
   return (
     <main className={`min-h-screen ${theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black'}`}>
-      {/* Show warning only if explicitly false */}
+      {/* Show warning only if Telegram is explicitly false */}
       {isTelegram === false && (
         <div className="p-4 bg-yellow-100 text-yellow-800 border border-yellow-300 rounded my-4">
-          ⚠️ This app is designed to run inside the <strong>Telegram Mini App</strong> only.<br />
+          ⚠️ This app is designed to run inside the <strong>Telegram Mini App</strong> only.
+          <br />
           Please open it from your Telegram bot.
         </div>
       )}
